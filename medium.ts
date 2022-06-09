@@ -111,3 +111,26 @@ type StringToUnion<T extends string> = T extends `${infer L}${infer R}`
 type Merge<F, S> = {
   [K in keyof F | keyof S]: K extends keyof S ? S[K] : K extends keyof F ? F[K] : never;
 };
+
+/** KebabCase */
+type Upper = "A" | "B" | "C" | "F"; // to complete
+type KebabCase<S extends string, T extends boolean = true> = S extends `${infer F}${infer R}`
+  ? `${F extends Upper ? `${T extends true ? "" : "-"}${Lowercase<F>}` : F}${KebabCase<R, false>}`
+  : "";
+
+/** Diff */
+type Diff<O, O1> = {
+  [K in Exclude<keyof O | keyof O1, keyof O & keyof O1>]: K extends keyof O
+    ? O[K]
+    : K extends keyof O1
+    ? O1[K]
+    : never;
+};
+
+/** AnyOf */
+type False = 0 | "" | false | [] | Record<string, never>;
+type AnyOf<T extends readonly any[]> = T extends [infer F, ...infer R]
+  ? F extends False
+    ? AnyOf<R>
+    : true
+  : false;
