@@ -134,3 +134,60 @@ type AnyOf<T extends readonly any[]> = T extends [infer F, ...infer R]
     ? AnyOf<R>
     : true
   : false;
+
+/** IsNever */
+type IsNever<T> = [T] extends [never] ? true : false;
+
+/** IsUnion */
+type helper1<T> = T extends any ? T[] : never; // dist
+type helper2<T> = [T] extends [any] ? T[] : never; // no dist
+export type IsUnion<T> = helper2<T> extends helper1<T> ? false : true;
+
+/** ReplaceKeys */
+type ReplaceKeys<U, T, Y> = {
+  [K in keyof U]: K extends T ? (K extends keyof Y ? Y[K] : never) : U[K];
+};
+
+/** Remove Index Signature */
+type RemoveIndexSignature<T> = {
+  [P in keyof T as P extends `${infer R}` ? R : never]: T[P];
+};
+
+/** Percentage Parser */
+type SignParse<T extends string> = T extends `+${infer R}`
+  ? ["+", R]
+  : T extends `-${infer R}`
+  ? ["-", R]
+  : ["", T];
+type PercentageParser<A extends string> = A extends `${infer L}%`
+  ? [...SignParse<L>, "%"]
+  : [...SignParse<A>, ""];
+
+/** Drop Char */
+type DropChar<S extends string, C extends string> = S extends `${infer F}${infer R}`
+  ? `${F extends C ? "" : F}${DropChar<R, C>}`
+  : S;
+
+/** MinusOne */
+
+/** PickByType */
+type PickByType<T, U> = { [K in keyof T as T[K] extends U ? K : never]: T[K] };
+
+/** StartsWith */
+type StartsWith<T extends string, U extends string> = T extends `${U}${infer R}` ? true : false;
+
+/** EndsWith */
+type EndsWith<T extends string, U extends string> = T extends `${infer L}${U}` ? true : false;
+
+/** PartialByKeys */
+type PartialByKeys<T, K extends keyof any = string> = Omit<
+  { [k in K & keyof T]?: T[k] } & Omit<T, K>,
+  never
+>;
+
+/** REVIEW: RequiredByKeys */
+type RequiredByKeys<T, K extends keyof any = keyof T> = T & {
+  [P in keyof T & K]-?: T[P] extends infer R | undefined ? R : T[P];
+} extends infer R
+  ? { [P in keyof R]: R[P] }
+  : never;
